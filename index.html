@@ -483,9 +483,12 @@ h2{letter-spacing:-.5px !important;font-weight:900 !important}
 }
 
 
+
+
 </style>
 </head>
 <body>
+
 <div id="app">
 
   <div id="top">
@@ -861,7 +864,75 @@ function vkInit(){
     }).catch(nop);
   }catch(e){}
 }
+
+/* ---------- вибрация: пользователь может выключить ----------
+   Требование модерации ВК: на мобильных устройствах должна быть
+   возможность отключить вибрацию. Выбор запоминается отдельно от
+   игрового сохранения, поэтому переживает сброс прогресса. */
+var VIB_KEY='vib_off_v1';
+function vibOn(){
+  try{return localStorage.getItem(VIB_KEY)!=='1';}catch(e){return true;}
+}
+function setVib(on){
+  try{
+    if(on)localStorage.removeItem(VIB_KEY);
+    else localStorage.setItem(VIB_KEY,'1');
+  }catch(e){}
+}
+function toggleVib(){
+  var on=!vibOn();
+  setVib(on);
+  paintVibBtns();
+  if(on&&navigator.vibrate)navigator.vibrate(12);
+  if(typeof toast==='function')toast(on?'Вибрация включена':'Вибрация выключена');
+  return on;
+}
+function paintVibBtns(){
+  var on=vibOn();
+  var list=document.querySelectorAll('.vibBtn');
+  for(var i=0;i<list.length;i++){
+    list[i].textContent=on?'Вибрация: вкл':'Вибрация: выкл';
+    list[i].setAttribute('aria-pressed',on?'true':'false');
+  }
+}
+
+/* ===== ВИБРАЦИЯ-КНОПКА =====
+   Модерация ВК требует возможность отключить вибрацию на телефоне.
+   Кнопку ставим рядом с кнопкой звука — так её легко найти,
+   и не нужно менять вёрстку каждого экрана. */
+(function(){
+  function mk(){
+    if(document.getElementById('vibBtn'))return;
+    var snd=null, ids=['sndBtn','sndBtn2','btnSnd','soundBtn'];
+    for(var i=0;i<ids.length;i++){
+      var e=document.getElementById(ids[i]);
+      if(e){snd=e;break;}
+    }
+    if(!snd||!snd.parentNode)return;
+    var b=document.createElement('button');
+    b.id='vibBtn';
+    b.className=snd.className+' vibBtn';
+    b.type='button';
+    b.setAttribute('aria-label','Вибрация');
+    b.textContent='Вибрация: вкл';
+    snd.parentNode.insertBefore(b,snd.nextSibling);
+    b.addEventListener('pointerdown',function(e){
+      e.preventDefault();e.stopPropagation();
+      if(typeof toggleVib==='function')toggleVib();
+    },{passive:false});
+    b.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();});
+    if(typeof paintVibBtns==='function')paintVibBtns();
+  }
+  if(document.readyState==='loading')
+    document.addEventListener('DOMContentLoaded',mk);
+  else mk();
+})();
+
+
+
+
 function haptic(s){
+  if(!vibOn())return;
   if(VK.ready)bridge.send('VKWebAppTapticImpactOccurred',{style:s||'light'}).catch(nop);
   else if(navigator.vibrate)navigator.vibrate(s==='heavy'?38:8);
 }
@@ -890,6 +961,43 @@ function joinGroup(){
 }
 
 
+
+/* ---------- ссылка на само приложение ----------
+   Модерация ВК: «в шеринге ссылка на сторонний ресурс». Раньше уходил
+   location.href — адрес хостинга, для ВК это внешний сайт. Собираем
+   внутреннюю ссылку vk.com/app<id> из параметров запуска. Если id
+   неизвестен (открыто вне ВК), ссылку не прикладываем совсем. */
+var VK_APP_ID='';
+(function(){
+  try{
+    var q=new URLSearchParams(location.search);
+    var id=q.get('vk_app_id')||'';
+    if(!id&&location.hash){
+      var h=new URLSearchParams(location.hash.replace(/^#/,''));
+      id=h.get('vk_app_id')||'';
+    }
+    if(/^\d+$/.test(id))VK_APP_ID=id;
+  }catch(e){}
+})();
+function vkAppLink(){
+  return VK_APP_ID?('https://vk.com/app'+VK_APP_ID):'';
+}
+
+/* Вне ВКонтакте: отдаём текст со ссылкой на приложение, если она
+   известна. Адрес хостинга наружу не уходит. */
+function shareText(t){
+  var l=vkAppLink();
+  return l?(t+' '+l):t;
+}
+function shareOut(t){
+  var l=vkAppLink();
+  var d={text:t};
+  if(l)d.url=l;
+  if(navigator.share){navigator.share(d).catch(function(){});return;}
+  try{navigator.clipboard.writeText(shareText(t));}catch(e){}
+}
+
+
 /* ---------- поделиться результатом ----------
    Старый метод постинга на стену ВК отключил,
    и модерация браковала приложения за его вызов. Теперь:
@@ -901,9 +1009,10 @@ function shareStory(text,link){
   try{
     bridge.send('VKWebAppShowStoryBox',{
       background_type:'none',
-      attachment:{text:'open',type:'url',url:link||location.href}
+      attachment:{text:'open',type:'url',url:link||vkAppLink()}
     }).catch(function(){
-      bridge.send('VKWebAppShare',{link:link||location.href}).catch(nop);
+      var _l=link||vkAppLink();
+      if(_l)bridge.send('VKWebAppShare',{link:_l}).catch(nop);
     });
     return true;
   }catch(e){return false;}
@@ -914,9 +1023,9 @@ function share(){
   var t=b?('Выбил '+b.n+' за 🪙 '+fnum(b.v)+' в «КЕЙС-БАТЛЕ» 🎁 Проверь свою удачу!')
          :('Открыл '+P.opened+' кейсов в «КЕЙС-БАТЛЕ» 🎁 Присоединяйся!');
   if(VK.ready){
-    shareStory(t,location.href);
-  }else if(navigator.share){navigator.share({text:t,url:location.href}).catch(nop);}
-  else{try{navigator.clipboard.writeText(t+' '+location.href);toast('📋 Скопировано');}catch(e){toast(t);}}
+    shareStory(t,vkAppLink());
+  }else if(navigator.share){shareOut(t);}
+  else{try{navigator.clipboard.writeText(shareText(t));toast('📋 Скопировано');}catch(e){toast(t);}}
 }
 var adBusy=false;
 function watchAd(cb){
@@ -2441,7 +2550,18 @@ window.__K={P:P,RAR:RAR,ITEMS:ITEMS,CASES:CASES,
   itemMenu:itemMenu,today:today,A:A,sfx:sfx,toggleSnd:toggleSnd,
   get spinning(){return spinning;},set spinning(v){spinning=v;},
   setTab:function(t){tab=t;render();}};
+
+/* Экспорт для автопроверки требований модерации (не влияет на игру) */
+try{window.__MOD={
+  link:function(){return typeof vkAppLink==='function'?vkAppLink():null;},
+  vibOn:function(){return typeof vibOn==='function'?vibOn():null;},
+  toggleVib:function(){return typeof toggleVib==='function'?toggleVib():null;},
+  haptic:function(s){if(typeof haptic==='function')haptic(s);}
+};}catch(e){}
+
 })();
+
+
 </script>
 </body>
 </html>

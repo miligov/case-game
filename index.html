@@ -521,6 +521,7 @@ h2{letter-spacing:-.5px !important;font-weight:900 !important}
     <div id="bWrap">
       <div id="bCols"></div>
       <div id="bInfo"></div>
+      <div id="bActs" style="display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap"></div>
     </div>
     <div id="rRes">
       <div id="rBig">🔫</div>
@@ -576,7 +577,20 @@ h2{letter-spacing:-.5px !important;font-weight:900 !important}
   <div id="toast"></div>
 </div>
 
-<script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+<script>
+/* VK Bridge 3.0.2 — встроен в файл: запуск и синхронизация не зависят
+   от внешних CDN (блокирующий внешний скрипт мог мешать запуску). */
+(()=>{"use strict";let e;var t={};let p="u">typeof window,n=!!(p&&window.AndroidBridge),o=!!(p&&window.webkit?.messageHandlers?.VKWebAppClose),r=!!(p&&window.ReactNativeWebView&&"function"==typeof window.ReactNativeWebView.postMessage),i=p&&!n&&!o,a=i&&/(^\?|&)vk_platform=mobile_web(&|$)/.test(location.search),s=i?"message":"VKWebAppEvent",d=["VKWebAppInit","VKWebAppGetCommunityAuthToken","VKWebAppAddToCommunity","VKWebAppAddToHomeScreenInfo","VKWebAppClose","VKWebAppCopyText","VKWebAppCreateHash","VKWebAppGetUserInfo","VKWebAppSetLocation","VKWebAppSendToClient","VKWebAppGetClientVersion","VKWebAppGetPhoneNumber","VKWebAppGetEmail","VKWebAppGetGroupInfo","VKWebAppGetGeodata","VKWebAppGetCommunityToken","VKWebAppGetConfig","VKWebAppGetLaunchParams","VKWebAppSetTitle","VKWebAppGetAuthToken","VKWebAppCallAPIMethod","VKWebAppJoinGroup","VKWebAppLeaveGroup","VKWebAppAllowMessagesFromGroup","VKWebAppDenyNotifications","VKWebAppAllowNotifications","VKWebAppOpenPayForm","VKWebAppOpenApp","VKWebAppShare","VKWebAppShowWallPostBox","VKWebAppScroll","VKWebAppShowOrderBox","VKWebAppShowLeaderBoardBox","VKWebAppShowInviteBox","VKWebAppShowRequestBox","VKWebAppAddToFavorites","VKWebAppShowStoryBox","VKWebAppStorageGet","VKWebAppStorageGetKeys","VKWebAppStorageSet","VKWebAppFlashGetInfo","VKWebAppSubscribeStoryApp","VKWebAppOpenWallPost","VKWebAppCheckAllowedScopes","VKWebAppCheckBannerAd","VKWebAppHideBannerAd","VKWebAppShowBannerAd","VKWebAppCheckNativeAds","VKWebAppShowNativeAds","VKWebAppRetargetingPixel","VKWebAppConversionHit","VKWebAppShowSubscriptionBox","VKWebAppCheckSurvey","VKWebAppShowSurvey","VKWebAppScrollTop","VKWebAppScrollTopStart","VKWebAppScrollTopStop","VKWebAppShowSlidesSheet","VKWebAppTranslate","VKWebAppRecommend","VKWebAppAddToProfile","VKWebAppGetFriends",...i&&!a?["VKWebAppResizeWindow","VKWebAppAddToMenu","VKWebAppShowInstallPushBox","VKWebAppShowCommunityWidgetPreviewBox","VKWebAppCallStart","VKWebAppCallJoin","VKWebAppCallGetStatus"]:["VKWebAppShowImages"]],A=p?window.AndroidBridge:void 0,b=o?window.webkit.messageHandlers:void 0,l=i?parent:void 0,u=function(t){var p;let a,u,W,V,K=[],c=Math.random().toString(36).substring(2,5);function w(e){K.push(e)}function S(e){return n?!!(A&&"function"==typeof A[e]):o?!!(b?.[e]&&"function"==typeof b[e].postMessage):!!i&&d.includes(e)}function f(){return o||n}function h(){return i&&window.parent!==window}function g(){return f()||h()}function v(e){if(o||n)return[...K].map(t=>t.call(null,e));let t=e?.data;if(!i||!t)return;if(r&&"string"==typeof t)try{t=JSON.parse(t)}catch{}let{type:p,data:s,frameId:d}=t;if(p){if("VKWebAppSettings"===p){a=d;return}[...K].map(e=>e({detail:{type:p,data:s}}))}}r&&/(android)/i.test(navigator.userAgent)?document.addEventListener(s,v):"u">typeof window&&"addEventListener"in window&&window.addEventListener(s,v);let y=(p=function(e,p){A?.[e]?A[e](JSON.stringify(p)):b?.[e]&&"function"==typeof b[e].postMessage?b[e].postMessage?.(p):r?window.ReactNativeWebView.postMessage(JSON.stringify({handler:e,params:p})):l&&"function"==typeof l.postMessage&&l.postMessage({handler:e,params:p,type:"vk-connect",webFrameId:a,connectVersion:t},"*")},u={current:0,next(){return++this.current}},W={},V={add(e,t){let p=null!=t?t:`${u.next()}_${c}`;return W[p]=e,p},resolve(e,t,p){let n=W[e];n&&(p(t)?n.resolve(t):n.reject(t),W[e]=null)}},w(e=>{if(e.detail?.data&&"object"==typeof e.detail.data&&"request_id"in e.detail.data){let{request_id:t,...p}=e.detail.data;t&&V.resolve(t,p,e=>!("error_type"in e))}}),function(e,t={}){return new Promise((n,o)=>{let r=V.add({resolve:n,reject:o},t.request_id);p(e,{...t,request_id:r})})});async function m(t){if(n||o)return S(t);if(e)return e.has(t);try{let t=await y("SetSupportedHandlers");e=new Set(t.supportedHandlers)}catch(t){e=new Set(["VKWebAppInit"])}return e.has(t)}return w(t=>{t.detail&&"SetSupportedHandlers"===t.detail.type&&(e=new Set(t.detail.data.supportedHandlers))}),{send:y,sendPromise:y,subscribe:w,unsubscribe:function(e){let t=K.indexOf(e);t>-1&&K.splice(t,1)},supports:function(e){return console.warn("bridge.supports method is deprecated. Use bridge.supportsAsync instead."),S(e)},supportsAsync:m,isWebView:f,isIframe:h,isEmbedded:g,isStandalone:function(){return!g()}}}("3.0.2");window.vkBridge=window.vkConnect=u;var W=window;for(var V in t)W[V]=t[V];t.__esModule&&Object.defineProperty(W,"__esModule",{value:!0})})();
+(function(){
+  if(typeof window!=='undefined'&&window.vkBridge)return;
+  try{
+    var s=document.createElement('script');
+    s.src='https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
+    s.async=true;s.onerror=function(){};
+    document.head.appendChild(s);
+  }catch(e){}
+})();
+</script>
 <script>
 (function(){
 'use strict';
@@ -852,10 +866,15 @@ function toggleSnd(){
    ============================================================ */
 var VK={ready:false};
 var bridge=window.vkBridge||null;
+function vkBridgeNow(){return window.vkBridge||window.vkConnect||null;}
 function vkInit(){
-  if(!bridge||!bridge.send)return;
+  if(!VK.ready){
+    bridge=vkBridgeNow();
+    if(!bridge||!bridge.send)return false;
+  }
   try{
     bridge.send('VKWebAppInit').then(function(){
+      if(VK.ready)return;
       VK.ready=true;
       bridge.send('VKWebAppGetUserInfo').then(function(u){
         if(u&&u.first_name)P.name=u.first_name;
@@ -863,7 +882,14 @@ function vkInit(){
       cloudLoad();
     }).catch(nop);
   }catch(e){}
+  return true;
 }
+(function(){
+  var tries=0;
+  var t=setInterval(function(){
+    if(vkInit()||++tries>40)clearInterval(t);
+  },300);
+})();
 
 /* ---------- вибрация: пользователь может выключить ----------
    Требование модерации ВК: на мобильных устройствах должна быть
@@ -891,7 +917,10 @@ function paintVibBtns(){
   var on=vibOn();
   var list=document.querySelectorAll('.vibBtn');
   for(var i=0;i<list.length;i++){
-    list[i].textContent=on?'Вибрация: вкл':'Вибрация: выкл';
+    var ico=list[i].getAttribute('data-ico')==='1';
+    list[i].textContent=ico?(on?'\u2707':'\u2205')
+                          :(on?'Вибрация: вкл':'Вибрация: выкл');
+    list[i].title=on?'Вибрация включена':'Вибрация выключена';
     list[i].setAttribute('aria-pressed',on?'true':'false');
   }
 }
@@ -914,6 +943,11 @@ function paintVibBtns(){
     b.className=snd.className+' vibBtn';
     b.type='button';
     b.setAttribute('aria-label','Вибрация');
+    /* Если сосед — компактная иконка, подписи не будет: длинный текст
+       ломает шапку. paintVibBtns() учитывает это через data-ico. */
+    if(/\bico\b/.test(snd.className)||(snd.textContent||'').trim().length<=2){
+      b.setAttribute('data-ico','1');
+    }
     b.textContent='Вибрация: вкл';
     snd.parentNode.insertBefore(b,snd.nextSibling);
     b.addEventListener('pointerdown',function(e){
@@ -1057,17 +1091,39 @@ function save(){
 }
 function mergeSave(o){
   if(!o||typeof o!=='object')return;
-  ['name','coins','lvl','xp','opened','sold','earned','battles','bwins','crafts','upgrades',
-   'upWins','bestDrop','bestItem','knives','daily','seenIntro','stCount','vip','vipUntil',
-   'luckUntil','x2Until','freeCases','freeUsed','freeDay','adCount','streak','streakDay',
-   'pass','passXp','bonusCase','wheelDay'].forEach(function(k){
-    if(typeof o[k]==='number'&&isFinite(o[k]))P[k]=o[k];
-    else if(typeof o[k]==='string')P[k]=o[k];
-  });
+  /* Двусторонняя синхронизация (п.2.3.8): числовые показатели берём
+     по МАКСИМУМУ, чтобы прогресс на любом устройстве не терялся
+     («синхронизация в меньшую сторону» — исправлена). */
+  ['coins','lvl','xp','opened','sold','earned','battles','bwins','crafts','upgrades',
+   'upWins','bestDrop','knives','stCount','vip','vipUntil',
+   'luckUntil','x2Until','freeCases','freeUsed','adCount','streak','streakDay',
+   'pass','passXp','bonusCase']
+    .forEach(function(k){
+      if(typeof o[k]==='number'&&isFinite(o[k]))
+        P[k]=Math.max(P[k]||0,Math.max(0,Math.round(o[k])));
+    });
+  /* временные метки и строки — берём большее/более новое */
+  if(typeof o.daily==='string'&&o.daily>P.daily)P.daily=o.daily;
+  if(typeof o.freeDay==='string'&&o.freeDay>P.freeDay)P.freeDay=o.freeDay;
+  if(typeof o.wheelDay==='string'&&o.wheelDay>P.wheelDay)P.wheelDay=o.wheelDay;
+  if(typeof o.name==='string'&&o.name)P.name=o.name;
+  if(typeof o.bestItem==='string'&&o.bestItem)P.bestItem=o.bestItem;
   if(typeof o.snd==='boolean')P.snd=o.snd;
-  if(Array.isArray(o.inv))P.inv=o.inv.slice(0,400);
-  if(o.coll&&typeof o.coll==='object')P.coll=o.coll;
-  if(o.passClaim&&typeof o.passClaim==='object')P.passClaim=o.passClaim;
+  if(typeof o.seenIntro==='number')P.seenIntro=Math.max(P.seenIntro||0,o.seenIntro);
+  /* инвентарь: объединяем — берём более полный список (по числу предметов) */
+  if(Array.isArray(o.inv)){
+    var a=P.inv||[], b=o.inv.slice(0,400);
+    if(b.length>=a.length)P.inv=b;
+  }
+  /* коллекция и боевой пропуск: объединяем по максимуму */
+  if(o.coll&&typeof o.coll==='object'){
+    P.coll=P.coll||{};
+    for(var k in o.coll)if((o.coll[k]||0)>(P.coll[k]||0))P.coll[k]=o.coll[k];
+  }
+  if(o.passClaim&&typeof o.passClaim==='object'){
+    P.passClaim=P.passClaim||{};
+    for(var k2 in o.passClaim)if(o.passClaim[k2])P.passClaim[k2]=1;
+  }
 }
 function localLoad(){try{var s=localStorage.getItem(SAVE);if(s)mergeSave(JSON.parse(s));}catch(e){}}
 function cloudLoad(){
@@ -1077,9 +1133,13 @@ function cloudLoad(){
       var kv=(d.keys||[])[0];
       if(kv&&kv.value){
         var c=JSON.parse(kv.value);
-        if((c.earned||0)>(P.earned||0)||(c.coins||0)>(P.coins||0)){
-          mergeSave(c);paintTop();render();toast('☁️ Прогресс загружен');
-        }else save();
+        /* двусторонняя синхронизация: объединяем облачный и локальный
+           прогресс (максимум по полям, объединение инвентаря), затем
+           пишем единое состояние обратно — и в облако, и локально */
+        mergeSave(c);
+        save();
+        paintTop();render();
+        toast('☁️ Прогресс синхронизирован');
       }else save();
     }catch(e){}
   }).catch(nop);
@@ -1661,6 +1721,8 @@ function openCase(cs,free){
   $('bWrap').classList.remove('on');
   $('reelWrap').style.display='';
   $('rRes').classList.remove('on');
+  $('rActs').innerHTML='';
+  $('bActs').innerHTML='';
   $('rTitle').textContent=cs.e+' '+cs.n+' — крутим…';
   $('roul').classList.add('on');
   paintTop();
@@ -1740,6 +1802,8 @@ function closeRoul(){
   $('rRes').classList.remove('on');
   $('bWrap').classList.remove('on');
   $('reelWrap').style.display='';
+  $('rActs').innerHTML='';
+  $('bActs').innerHTML='';
   render();
 }
 function confetti(){
@@ -1891,13 +1955,15 @@ function battleEnd(){
     $('bInfo').innerHTML='<b style="color:#ff8080">Победил '+best.name+' (🪙 '+fnum(best.sum)+')</b>';
     toast('Не повезло. В следующий раз!');
   }
-  var acts=document.createElement('div');
-  acts.style.cssText='display:flex;gap:8px;justify-content:center;margin-top:8px';
+  /* Кнопки результата боя добавляем в постоянный контейнер bActs,
+     предварительно очищая его: раньше battleEnd() добавлял новый блок
+     через appendChild без очистки, и кнопки «Закрыть» дублировались
+     при повторном вызове (наслоение элементов). */
+  var acts=$('bActs');acts.innerHTML='';
   var b=document.createElement('button');
   b.className='btn sm';b.textContent='Закрыть';
   b.onclick=function(){battle=null;closeRoul();};
   acts.appendChild(b);
-  $('bWrap').appendChild(acts);
   spinning=false;
   save();paintTop();
 }
@@ -2510,7 +2576,10 @@ $('roul').addEventListener('click',function(e){
 
 document.addEventListener('visibilitychange',function(){
   if(document.hidden){save();stopMusic();}
-  else if(A.started&&P.snd!==false)startMusic();
+  else{
+    if(A.started&&P.snd!==false)startMusic();
+    if(VK.ready)cloudLoad();   /* возврат в приложение — синхронизация */
+  }
 });
 window.addEventListener('beforeunload',save);
 setInterval(save,20000);
@@ -2546,7 +2615,7 @@ window.__K={P:P,RAR:RAR,ITEMS:ITEMS,CASES:CASES,
   get sel(){return sel;},set sel(v){sel=v;},
   openUpgrade:openUpgrade,runUpgrade:runUpgrade,finishUpgrade:finishUpgrade,
   get upState(){return upState;},
-  save:save,render:render,paintTop:paintTop,openStats:openStats,showScr:showScr,
+  save:save,mergeSave:mergeSave,localLoad:localLoad,render:render,paintTop:paintTop,openStats:openStats,showScr:showScr,
   itemMenu:itemMenu,today:today,A:A,sfx:sfx,toggleSnd:toggleSnd,
   get spinning(){return spinning;},set spinning(v){spinning=v;},
   setTab:function(t){tab=t;render();}};
@@ -2556,12 +2625,14 @@ try{window.__MOD={
   link:function(){return typeof vkAppLink==='function'?vkAppLink():null;},
   vibOn:function(){return typeof vibOn==='function'?vibOn():null;},
   toggleVib:function(){return typeof toggleVib==='function'?toggleVib():null;},
-  haptic:function(s){if(typeof haptic==='function')haptic(s);}
+  haptic:function(s){if(typeof haptic==='function')haptic(s);},
+  mergeSave:function(o){return typeof mergeSave==='function'?mergeSave(o):null;},
+  getP:function(){return typeof P!=='undefined'?JSON.parse(JSON.stringify(P)):null;}
 };}catch(e){}
 
 })();
 
 
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25da2c30c9aa103',t:'MTc4NTg0NzI4MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

@@ -16,7 +16,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   display:flex;flex-direction:column;background:linear-gradient(180deg,#171c26 0%,#10141c 50%,#0a0c11 100%)}
 
 /* ---------- Шапка ---------- */
-#top{flex:0 0 auto;z-index:6;padding:calc(7px + env(safe-area-inset-top)) 10px 7px;
+/* Шапка всегда поверх экранов (заставка/правила/статы — z-index 50):
+   иначе кнопка звука на заставке не нажимается — модерация это
+   фиксировала как «кнопка отключения звука не работает». */
+#top{flex:0 0 auto;z-index:70;position:relative;padding:calc(7px + env(safe-area-inset-top)) 10px 7px;
   display:flex;align-items:center;gap:8px;
   background:linear-gradient(180deg,rgba(22,27,38,.97),rgba(22,27,38,.7));
   border-bottom:1px solid rgba(255,255,255,.07)}
@@ -721,7 +724,11 @@ function actx(){
     try{
       var C=window.AudioContext||window.webkitAudioContext;
       A.ctx=new C();
-      A.master=A.ctx.createGain();A.master.gain.value=.9;A.master.connect(A.ctx.destination);
+      /* Мастер-громкость — общий рубильник всего звука. Если звук
+         выключен (P.snd===false), контекст создаётся сразу молчаливым:
+         и музыка, и эффекты идут через A.master. */
+      var muted=typeof P!=='undefined'&&P.snd===false;
+      A.master=A.ctx.createGain();A.master.gain.value=muted?0:.9;A.master.connect(A.ctx.destination);
       A.mus=A.ctx.createGain();A.mus.gain.value=.0001;A.mus.connect(A.master);
       A.sfx=A.ctx.createGain();A.sfx.gain.value=.9;A.sfx.connect(A.master);
     }catch(e){A.on=false;A.ctx=null;}
@@ -754,7 +761,10 @@ function nz(d,v,hpf,t0){
   s.connect(f);f.connect(g);g.connect(A.sfx);s.start(t);s.stop(t+d+.04);
 }
 function sfx(n,p){
-  if(!A.on||!actx())return;
+  /* Звук выключен кнопкой — эффекты не играют вообще.
+     Требование модерации: кнопка должна отключать ВЕСЬ звук,
+     а не только музыку. */
+  if(P.snd===false||!A.on||!actx())return;
   var c=A.ctx,t=c.currentTime;
   switch(n){
     case 'tick': bp(1500+rf(-90,90),.022,'square',.045); break;
@@ -854,9 +864,26 @@ function audioWake(){
   if(!actx())return;
   if(P.snd!==false)startMusic();
 }
+/* Мастер-громкость — общий рубильник. Через неё идут и музыка,
+   и все эффекты, поэтому она глушит всё разом. */
+function setMasterVol(v){
+  if(!A.ctx||!A.master)return;
+  var t=A.ctx.currentTime;
+  A.master.gain.cancelScheduledValues(t);
+  A.master.gain.setTargetAtTime(v,t,.04);
+}
 function toggleSnd(){
   P.snd=(P.snd===false);
-  if(P.snd){A.started=true;actx();startMusic();}else stopMusic();
+  if(P.snd){
+    A.started=true;
+    if(actx()){
+      setMasterVol(.9);
+      startMusic();
+    }
+  }else{
+    stopMusic();
+    setMasterVol(0);   /* глушит и музыку, и эффекты */
+  }
   $('sndBtn').textContent=P.snd?'🔊':'🔇';
   save();toast(P.snd?'🔊 Звук включён':'🔇 Звук выключен');
 }
@@ -2634,5 +2661,5 @@ try{window.__MOD={
 
 
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25da2c30c9aa103',t:'MTc4NTg0NzI4MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25da2c30c9aa103',t:'MTc4NTg0NzI4MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26d47ff8c138d59',t:'MTc4NjAxMTMzNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
